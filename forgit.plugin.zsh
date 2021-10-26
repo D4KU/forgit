@@ -249,7 +249,8 @@ forgit::checkout::file_from_branch() {
 
     # "--relative" & "-- .": only show files in working dir
     # "--diff-filter=MD": only show modified and deleted files present in the target branch
-    files="$(git diff --name-only --relative --diff-filter=MD $1 -- . | FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd")"
+    # "--no-renames": always show files with their names as in the target branch
+    files="$(git diff --name-only --no-renames --relative --diff-filter=MD $1 -- . | FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd")"
     [[ -n "$files" ]] && echo "$files" | tr '\n' '\0' | xargs -0 -I% git checkout $@ -- %
 }
 
