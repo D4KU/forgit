@@ -240,7 +240,7 @@ forgit::checkout::file_from_branch() {
     forgit::inside_work_tree || return 1
     [[ $# -eq 0 ]] && { echo "No branch name given."; return 1; }
     local cmd files opts
-    cmd="git diff --color=always $1 -- {} | $forgit_diff_pager"
+    cmd="git diff --color=always ..$1 -- {} | $forgit_diff_pager"
     opts="
         $FORGIT_FZF_DEFAULT_OPTS
         -m -0
