@@ -689,6 +689,25 @@ _forgit_checkout_branch() {
     fi
 }
 
+# git checkout-file from other branch selector
+_forgit_checkout_file_from_branch() {
+    _forgit_inside_work_tree || return 1
+    [[ $# -eq 0 ]] && { echo "No branch name given."; return 1; }
+    local cmd files opts
+    cmd="git diff --color=always ..$1 -- {} | $_forgit_diff_pager"
+    opts="
+        $FORGIT_FZF_DEFAULT_OPTS
+        -m -0
+        $FORGIT_CHECKOUT_FILE_FROM_BRANCH_FZF_OPTS
+    "
+
+    # "--relative" & "-- .": only show files in working dir
+    # "--diff-filter=MD": only show modified and deleted files present in the target branch
+    # "--no-renames": always show files with their names as in the target branch
+    files="$(git diff --name-only --no-renames --relative --diff-filter=MD $1 -- . | FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd")"
+    [[ -n "$files" ]] && echo "$files" | tr '\n' '\0' | xargs -0 -I% git checkout $@ -- %
+}
+
 _forgit_git_checkout_tag() {
     _forgit_checkout_tag_git_opts=()
     _forgit_parse_array _forgit_checkout_tag_git_opts "$FORGIT_CHECKOUT_TAG_GIT_OPTS"
@@ -921,6 +940,7 @@ public_commands=(
     "checkout_branch"
     "checkout_commit"
     "checkout_file"
+    "checkout_file_from_branch"
     "checkout_tag"
     "cherry_pick"
     "cherry_pick_from_branch"
